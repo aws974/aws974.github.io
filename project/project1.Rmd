@@ -1,0 +1,158 @@
+---
+title: "Project 1"
+author: "Alexis Salim"
+date: "4/4/21"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+---
+
+```{r setup, include=FALSE}
+## paste this chunk into the ```{r setup} chunk at the top of
+## your project 1 .Rmd file
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", 
+    warning = F, message = F, tidy = TRUE, tidy.opts = list(width.cutoff = 60), 
+    R.options = list(max.print = 100))
+```
+
+## Introduction
+
+The first dataset that I have chosen to examine for this project is the "pwt_sample" dataset, which has 1,428 observations and 7 variables. The dataset gives macroeconomic data for 21 countries. The variables are country, the country's ISO code, year, population in millions, human capital index, real GDP at 2011 prices, and a share of labor compensation in GDP. The second dataset that I have chosen to examine is the "ghp100k" dataset, which has 561 observations and 3 variables. This dataset provides estimates of the yearly rate of gun homicides per 100,000 people in the population of certain countries. The variables are country, year, and an estimated rate of gun homicide per 100,000 people. 
+  
+Both of these datasets were found using "https://vincentarelbundock.github.io/Rdatasets/datasets.html" provided in the project instructions. Personally, after looking for the common variable I wanted to explore (country) by using Ctrl+F, I thought that these two datasets would be interesting to look at for potential correlations. It is possible that I will find an association between GDP and gun homicide rates, but I do not know whether the relationship will be positive or negative. 
+
+
+
+```{r}
+#install.packages("stevedata")
+library(stevedata)
+library(tidyverse)
+glimpse(pwt_sample) #economic data for countries
+glimpse(ghp100k) #gun homicides per 100k people in different countries
+```
+
+
+
+## Joining/Merging
+
+In this section, I am joining the "pwt_sample" and "ghp100k" datasets into a dataset named "joined". I chose to use "inner_join" because I would like to look at the gun homicide data in relation to other variables, and doing an inner join allows for all NAs to be eliminated, and only keeps the data with a match in both datasets. Rows were dropped from both datasets: "pwt_sample" started with 1,428 rows and "ghp100k" started with 561 rows. These were narrowed down to 403 rows after the joining. 
+
+```{r}
+inner_join(pwt_sample, ghp100k) %>% glimpse()-> joined
+head(joined)
+```
+
+
+
+## Wrangling
+
+For the first line of code, I first selected the columns that were of most interest to me. I then arranged the columns by country. Finally, I filtered the data so I could just look at the information for Canada. In the second line of code, I created a new variable called "gunhomic", which displays the actual number of people killed by gun violence; this variable was added to my "joined" dataset. For the third line of code, I assessed the average gun homicide rate, average number of actual gun homicides, and average populations for each country along with counting the number of entries per country; I then arranged this data from greatest to least by average rate of gun homicides and rounded all the numeric variables to the hundredth place. In the fourth line of code, I generate summary statistics for the variables rgdpna, hc, labsh, and year. 
+
+Some interesting statistics to note are that Canada has the highest average rate of gun homicides out of 100k people (.71), while the United Kingdom has the lowest average rate of gun homicide out of 100k people (.06). Additionally, from the third line of code, I can determine that are 18 different countries in the "joined" dataset. From the summary statistics created in the fourth line of code, I can determine that the range of years for the dataset is from 1974 to 2017. 
+
+```{r}
+joined %>% select(country,isocode,year,value, everything()) %>% arrange(country) %>% filter(isocode=="CAN")
+```
+
+```{r}
+joined %>% mutate(gunhomic=value*10*pop) -> joined
+```
+
+```{r}
+joined %>% group_by(isocode) %>% summarize(avgrate=mean(value), avggunhomic=mean(gunhomic), meanpop=mean(pop), count=n()) %>% arrange (desc(avgrate)) %>% mutate_if(is.numeric, round, 2) 
+joined %>% summarize(mean(rgdpna), median(hc), sd(labsh), min(year), max(year)) -> summarystats
+summarystats
+```
+
+
+
+## Tidying: Rearranging
+
+To utilize the "pivot_wider" function, I first removed the columns that I was not interested in using the "select" function. I then created columns for each different isocode and used values from the "year" column. I renamed this dataset "widerjoin" and took a slice to observe the results and number of rows/columns.
+
+To utilize the "pivot_longer" function, I selected the columns with the isocodes as names and put those in a new "country code" column. I then used the values from these columns and placed them in a column called "year". I then omitted NAs from the table. This gave me back the data from before using "pivot_wider" in the first line of code in this section.
+
+```{r}
+joined %>% select(-hc, -rgdpna, -labsh, -country) %>% pivot_wider(names_from = "isocode", values_from = "year") -> widerjoin
+widerjoin %>% slice(1:15)
+widerjoin %>% pivot_longer(4:21, names_to="country code", values_to = "year") %>% na.omit()
+```
+
+
+
+## Visualizing
+
+```{r}
+cormat <- joined %>% select(humancap="hc", laborshare="labsh", realgdp="rgdpna", everything()) %>% select_if(is.numeric) %>% cor(use="pair") %>% round(2)
+cormat
+cormat %>% as.data.frame
+tidycorr <- cormat %>% as.data.frame %>% rownames_to_column("var1") %>% pivot_longer(-1, names_to="var2", values_to="correlation")
+tidycorr
+tidycorr %>% ggplot(aes(var1, var2, fill=correlation)) + geom_tile() +
+  scale_fill_gradient2(low="red",mid="white",high="blue")+ 
+  geom_text(aes(label=round(correlation,2)),color = "black", size = 4)+ 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+ 
+  coord_fixed() + ggtitle("Correlation Heatmap")
+```
+From the resulting correlation heatmap from the code chunk below, I can see that population and real GDP are highly positively correlated(.98). I can also see that year and value (estimate of gun homicide rate) are decently negatively correlated (-.61). Interestingly, there is almost no correlation between year and population; I expected that population would increase as the years increased.
+
+
+
+```{r}
+library(ggplot2)
+joined %>% ggplot(aes(year, rgdpna)) + geom_bar(stat="summary") + 
+  geom_line(aes(color=isocode)) + scale_color_manual(values=rainbow(18)) + 
+  scale_y_continuous("Real GDP (million USD in 2011)", breaks=seq(0, 4000000, 500000)) +
+  scale_x_continuous("Year", breaks=seq(1970, 2020, 5)) +
+  ggtitle("National GDP Over Time") 
+```  
+In this plot, the bars show that the average GDP for all countries tends to increase gradually over time; however, based on the individual lines, differences in individual countries' trends are more apparent. Based on the individual lines, for almost all the countries the real GDP trends up over time (with some exceptions).
+
+
+
+```{r}
+joined %>% ggplot(aes(year, value, color=isocode)) + geom_point(aes(shape=isocode)) +
+  scale_shape_manual(values=c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)) +
+  geom_smooth(method=lm, se=F) + 
+  scale_y_continuous("Estimated Homicide Rate (per 100k people)", breaks=seq(0, 1.7, .1)) +
+  scale_x_continuous("Year", breaks=seq(1970, 2020, 5)) +
+  ggtitle("National Gun Homicide Rate Over Time")
+```
+In this plot, one can see the trends of gun homicide rates over time and per country. The discrete points are plotted using different shapes and colors for each country, while lines of best fit were also created and colored based on country. For most of these countries, gun homicides have decreased over time.
+
+
+
+## Dimensionality Reduction
+
+```{r}
+library(cluster)
+library(plotly)
+pam_dat<-joined%>%select_if(is.numeric)
+sil_width<-vector()
+for(i in 2:10){  
+  pam_fit <- pam(pam_dat, k = i)  
+  sil_width[i] <- pam_fit$silinfo$avg.width  
+}
+ggplot()+geom_line(aes(x=1:10,y=sil_width))+scale_x_continuous(name="k",breaks=1:10)
+```
+Based on this graph, it appears that choosing 4 clusters is better than 3 since the silhouette width is higher. 
+
+
+Below is the code used for PAM clustering of the dataset using numeric variables and 4 clusters.
+
+```{r}
+pam <- joined %>% select_if(is.numeric) %>% pam(4)
+pam
+```
+
+```{r}
+final <- joined %>% mutate(cluster=pam$clustering)
+final%>%plot_ly(x= ~rgdpna,  y = ~pop, z = ~value, color= ~cluster,
+        type = "scatter3d", mode = "markers")
+```
+Based on the PAM clustering, I decided to visualize the data in 3D; I chose the variables "rgdpna", "value", and "pop" for the axes based on the large differences observed in these variables when looking at the medoids. The "value" axis shows the rate of gun homicides per 100k people. Although there are some overlapping/similar points between the groupings, they appear to be decently grouped overall. In particular, the yellow group is very distinct from the others. It also appears that the clusters are based mainly on the population and real GDP axes; the value ranges between/across groups appear to be pretty similar.
+
+

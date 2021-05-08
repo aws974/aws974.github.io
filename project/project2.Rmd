@@ -1,0 +1,244 @@
+---
+title: 'Project 2'
+author: "Alexis Salim"
+date: ''
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE,fig.align="center",warning=FALSE,message=FALSE,fig.width=8, fig.height=5, linewidth=60)
+options(tibble.width = 100,width = 100)
+library(tidyverse)
+
+class_diag<-function(probs,truth){
+  
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+  
+  #CALCULATE EXACT AUC
+  ord<-order(probs, decreasing=TRUE)
+  probs <- probs[ord]; truth <- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+  TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  
+  n <- length(TPR)
+  auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+  data.frame(acc,sens,spec,ppv,auc)
+}
+```
+
+
+## Dataset Introduction
+
+I have chosen the dataset "HealthInsurance" which looks at the Medical Expenditure Panel Survey data from 1996. It has 8,802 rows and 11 columns. The variables which are pretty self explanatory are age, gender, insurance, marriage status, self-employed, family size, region, ethnicity, and education. Two variables which require interpretation are 1) health (self-reported binary status of healthy or not), and 2) limit (is there any limitation on this person). Two of the variables (age and family) are numerical; the rest are categorical. 
+
+```{r}
+#install.packages("AER")
+library(AER)
+data("HealthInsurance")
+glimpse(HealthInsurance)
+```
+
+
+
+## MANOVA Testing
+
+In relation to health, the overall summary of the MANOVA test shows significance. Specifically (based on univariate ANOVA summary), for the age variable, the MANOVA test shows significance; this is not true of the family variable. There is a 18.5% chance of a Type-I error. Using the Bonferroni correction, there is no change in significance of the variables. In total, 4 tests were run: the MANOVA test, the univariate ANOVA test, and the two pairwise t-tests with one p-value per test. Some MANOVA assumptions, such as the number and independence of variables, are likely met by this data; the rest of the assumptions may not be.
+
+```{r}
+manov <- manova(cbind(age,family)~health, data=HealthInsurance)
+summary(manov)
+summary.aov(manov)
+pairwise.t.test(HealthInsurance$age, HealthInsurance$health, p.adj="none")
+pairwise.t.test(HealthInsurance$family, HealthInsurance$health, p.adj="none")
+1-.95^4 #probability of at least 1 typeI error
+.05/4 #bonferroni adjusted signif level
+```
+
+
+
+## Randomization Test
+
+The null hypothesis for this test is that there is no mean age difference between the two health response groups "yes" or "no". The alternative hypothesis is that there is a mean age difference between the two health response groups. Based on the randomization test and the two-tailed p-value of 0, we can reject the null hypothesis. The plot does not show vertical lines with the p-values becaues they are so far out from what the randomization test results were. 
+
+```{r}
+set.seed(348)
+og_dist<-vector()
+
+for(i in 1:5000) {
+new <- data.frame(age=sample(HealthInsurance$age), health=HealthInsurance$health)
+og_dist[i]<-mean(new[new$health=="no",]$age)-   
+              mean(new[new$health=="yes",]$age)
+}
+
+HealthInsurance %>% group_by(health) %>%
+  summarize(means=mean(age)) %>% summarize(`mean_diff`=diff(means))
+
+mean(og_dist>3.1243 | og_dist<(-3.1243))
+
+hist(og_dist, main="",ylab=""); abline(v = c(-3.1243, 3.1243), col="blue")
+```
+
+
+## Linear Regression Model
+
+Based on the coefficients, it appears that the predicted family size for average age and health is 3.26 people. For people with average age, they are expected to have .02 less people in their family. For people that self-report as healthy, family size is .176 less. There is not a significant interaction between mean age and health. According to the r-squared value reported, 1.8% of variation can be explained by the model. 
+
+Using bptest, it appears that assumptions are met. The recomputed regression results with robust standard error does not appear to change much at all from the original model.
+
+```{r}
+HealthInsurance %>% mutate(age_c= age - mean(age,na.rm=T)) -> HealthInsurance
+linreg <- lm(family~age_c*health, data=HealthInsurance)
+summary(linreg)
+HealthInsurance %>% select(family, age_c, health) %>% na.omit %>% 
+  ggplot(aes(age_c, family, color=health)) + geom_point() + geom_smooth(method="lm") 
+library(lmtest)
+library(sandwich)
+bptest(linreg)
+coeftest(linreg, vcov=vcovHC(linreg))
+```
+
+
+
+## Bootstrapped SEs
+
+Based on the results, it appears that the bootstrapped SEs did not change much from the original and robust SEs from the previous section.
+
+```{r}
+set.seed(348)
+data.frame(HealthInsurance$health, HealthInsurance$family, HealthInsurance$age_c) -> dat
+samp_distn<-replicate(5000, {
+  boot_dat<-dat[sample(nrow(dat),replace=TRUE),]
+  fit<-lm(HealthInsurance.family~HealthInsurance.age_c*HealthInsurance.health, data=boot_dat)
+  coef(fit)
+})
+samp_distn%>%t%>%as.data.frame%>%summarize_all(sd)
+```
+
+
+
+## Logistic Regression Model From Two Variables
+
+Based on the logistic regression coefficients, people of the mean age are slightly more likely to have insurance than others. People who are self-employed are much less likely to have insurance compared to those who are not. The AUC of this model is not very high (.65); the accuracy, csensitivity, and precision are quite high, but the specificity is very low.
+
+The AUC calculated from the ROCplot matches the AUC of the model.
+
+```{r}
+glm(insurance~age_c+selfemp, data=HealthInsurance, family="binomial") -> logreg
+summary(logreg)
+predict(logreg, type="response") -> prob
+class_diag(prob, HealthInsurance$insurance)
+table(predict=as.numeric(prob>.5),truth=HealthInsurance$insurance)%>%addmargins
+
+HealthInsurance$logit<-predict(logreg,type="link")
+HealthInsurance %>% ggplot()+geom_density(aes(logit, color=insurance))
+
+library(plotROC)
+HealthInsurance<-HealthInsurance%>%mutate(prob=predict(logreg, type="response"), prediction=ifelse(prob>.5,1,0))
+classify<-HealthInsurance%>%transmute(prob,prediction,truth=insurance)
+ROCplot<-ggplot(classify)+geom_roc(aes(d=truth,m=prob), n.cuts=0) 
+ROCplot
+calc_auc(ROCplot)
+```
+
+
+
+## Predict Logistic Regression With Multiple Variables
+
+For the original model, AUC is pretty good (.76), and all other statistics are high except specificity(.17). 
+
+For the 10-fold CV, the statistics do not change very much at all (less than .01 difference for any statistic).
+
+After the LASSO, all variables were retained except the "limit" variable and the African American ethnicity. After performing the 10-fold CV on the LASSOed variables, the statistics still remained pretty much the same.
+
+```{r}
+HealthInsurance %>% select(-logit, -age_c, -prob, -prediction) ->HealthInsurance
+glm(insurance~., data=HealthInsurance, family="binomial") -> bigfit
+summary(bigfit)
+predict(bigfit, type="response") -> prob
+class_diag(prob, HealthInsurance$insurance)
+table(predict=as.numeric(prob>.5),truth=HealthInsurance$insurance)%>%addmargins
+
+set.seed(1234)
+k=10
+
+data1<- HealthInsurance[sample(nrow(HealthInsurance)),]
+folds<-cut(seq(1:nrow(HealthInsurance)),breaks=k,labels=F) 
+
+diags<-NULL
+for(i in 1:k){         
+  train<-data1[folds!=i,] 
+  test<-data1[folds==i,]  
+  
+  truth<-test$insurance
+  
+  fit<- glm(insurance~., data=train, family="binomial")
+  probs<- predict(fit, newdata=test, type="response")
+  
+  diags<-rbind(diags,class_diag(probs,truth)) 
+}
+
+summarize_all(diags,mean)
+
+library(glmnet)
+set.seed(1234)
+y<-as.matrix(HealthInsurance$insurance) 
+x<-model.matrix(insurance~.,data=HealthInsurance)[,-1] 
+cv<-cv.glmnet(x,y,family="binomial")
+lasso<-glmnet(x,y,family="binomial",lambda=cv$lambda.1se)
+coef(lasso)
+
+lasso_dat <- HealthInsurance %>% mutate(health= ifelse(health=="yes", 1, 0)) %>% mutate(gender=ifelse(gender=="male", 1,0)) %>% mutate(married= ifelse(married=="yes", 1, 0)) %>% mutate(selfemp= ifelse(selfemp=="yes", 1, 0)) %>% mutate(ethnicity= ifelse(ethnicity=="cauc", 1, 0)) %>% select(-limit)
+
+set.seed(1234)
+k=10
+
+data1<-lasso_dat[sample(nrow(lasso_dat)),]
+folds<-cut(seq(1:nrow(lasso_dat)),breaks=k,labels=F) 
+
+diags<-NULL
+for(i in 1:k){         
+  train<-data1[folds!=i,] 
+  test<-data1[folds==i,]  
+  
+  truth<-test$insurance
+  
+  fit<- glm(insurance~., data=train, family="binomial")
+  probs<- predict(fit, newdata=test, type="response")
+  
+  diags<-rbind(diags,class_diag(probs,truth)) 
+}
+
+summarize_all(diags,mean)
+```
+
+
+
