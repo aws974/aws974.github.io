@@ -1,0 +1,17 @@
+---
+title: python and r coding demonstration
+author: ''
+date: '2021-05-09'
+slug: python-and-r-coding-demonstration
+categories: []
+tags: []
+description: ''
+---
+
+
+
+
+```{python}
+
+```
+

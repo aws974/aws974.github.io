@@ -1,21 +1,28 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on Alexis Salim</title>
+    <title>Posts on Alexis&#39;s Final Project</title>
     <link>/post/</link>
-    <description>Recent content in Posts on Alexis Salim</description>
+    <description>Recent content in Posts on Alexis&#39;s Final Project</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Thu, 23 Jul 2015 21:13:14 -0500</lastBuildDate><atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 09 May 2021 00:00:00 +0000</lastBuildDate><atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Hello R Markdown</title>
-      <link>/post/2015/07/23/hello-r-markdown/</link>
-      <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
+      <title>python and r coding demonstration</title>
+      <link>/post/2021/05/09/python-and-r-coding-demonstration/</link>
+      <pubDate>Sun, 09 May 2021 00:00:00 +0000</pubDate>
       
-      <guid>/post/2015/07/23/hello-r-markdown/</guid>
-      <description>R Markdown This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
-You can embed an R code chunk like this:
-summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 26.00 ## Median :15.0 Median : 36.00 ## Mean :15.4 Mean : 42.98 ## 3rd Qu.</description>
+      <guid>/post/2021/05/09/python-and-r-coding-demonstration/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>test post and introduction (for fun)!</title>
+      <link>/post/2021/05/07/first-post/</link>
+      <pubDate>Fri, 07 May 2021 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2021/05/07/first-post/</guid>
+      <description>hello, how are you doing? i not be a great blogger or coder, but i had a great time going outside of my comfort zone for this class. i quickly wanted to plug my org, the austin meal movement: we are the only cooking and food organization on campus, and we have a great time getting together and learning with others.</description>
     </item>
     
   </channel>
