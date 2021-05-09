@@ -1,7 +1,7 @@
 ---
 title: 'Project 2'
 author: "Alexis Salim"
-date: ''
+date: '2021-05-07'
 output:
   html_document:
     toc: yes

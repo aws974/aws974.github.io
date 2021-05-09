@@ -17,30 +17,30 @@
     </item>
     
     <item>
+      <title>Project 2</title>
+      <link>/project/project2/</link>
+      <pubDate>Fri, 07 May 2021 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description>Dataset Introduction I have chosen the dataset “HealthInsurance” which looks at the Medical Expenditure Panel Survey data from 1996. It has 8,802 rows and 11 columns. The variables which are pretty self explanatory are age, gender, insurance, marriage status, self-employed, family size, region, ethnicity, and education. Two variables which require interpretation are 1) health (self-reported binary status of healthy or not), and 2) limit (is there any limitation on this person).</description>
+    </item>
+    
+    <item>
       <title>test post and introduction (for fun)!</title>
       <link>/post/2021/05/07/first-post/</link>
       <pubDate>Fri, 07 May 2021 00:00:00 +0000</pubDate>
       
       <guid>/post/2021/05/07/first-post/</guid>
-      <description>hello, how are you doing? i not be a great blogger or coder, but i had a great time going outside of my comfort zone for this class. i quickly wanted to plug my org, the austin meal movement: we are the only cooking and food organization on campus, and we have a great time getting together and learning with others.</description>
+      <description>hello, how are you doing? i not be a great blogger or coder, but i had a great time going outside of my comfort zone for this class. i quickly wanted to plug my org, the austin meal movement: we are the only cooking and food organization on campus, and we have a great time getting together and learning with others. if you would like to learn more, don’t hesitate to contact me!</description>
     </item>
     
     <item>
       <title>Project 1</title>
       <link>/project/project1/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 04 Apr 2021 00:00:00 +0000</pubDate>
       
       <guid>/project/project1/</guid>
       <description>Introduction The first dataset that I have chosen to examine for this project is the “pwt_sample” dataset, which has 1,428 observations and 7 variables. The dataset gives macroeconomic data for 21 countries. The variables are country, the country’s ISO code, year, population in millions, human capital index, real GDP at 2011 prices, and a share of labor compensation in GDP. The second dataset that I have chosen to examine is the “ghp100k” dataset, which has 561 observations and 3 variables.</description>
-    </item>
-    
-    <item>
-      <title>Project 2</title>
-      <link>/project/project2/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/project/project2/</guid>
-      <description>Dataset Introduction I have chosen the dataset “HealthInsurance” which looks at the Medical Expenditure Panel Survey data from 1996. It has 8,802 rows and 11 columns. The variables which are pretty self explanatory are age, gender, insurance, marriage status, self-employed, family size, region, ethnicity, and education. Two variables which require interpretation are 1) health (self-reported binary status of healthy or not), and 2) limit (is there any limitation on this person).</description>
     </item>
     
     <item>
