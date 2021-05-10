@@ -1,5 +1,5 @@
 ---
-title: python and r coding demonstration
+title: extremely simple python and r coding demonstration
 author: ''
 date: '2021-05-09'
 slug: python-and-r-coding-demonstration
@@ -8,10 +8,38 @@ tags: []
 description: ''
 ---
 
+how are you doing today? i may be an extremely new coder, but i can show you some simple code to demontrate how python and R can work together using reticulate.
 
 
+first, in R, we will run this code:
+
+```{r}
+library(reticulate)
+Alexis <- "I love"
+```
+
+
+then, in python, we will run this code: 
 
 ```{python}
-
+Salim="food and cooking"
+print(r.Alexis, Salim)
 ```
+
+pretty cool, it took something from R and put it into the python chunk to print out a sentence
+
+
+
+the same sentence can be printed in an R chunk like this:
+
+```{r}
+cat(c(Alexis, py$Salim))
+```
+
+
+in sum, you can tell that i really care about food and cooking :) i hope this simple demonstration made sense! 
+
+here's a picture of one of my favorite desserts from Japan: kakigori! it's a wonderfully light rendition of shaved ice
+
+![](/post/2021-05-09-python-and-r-coding-demonstration_files/kakigori.png)
 

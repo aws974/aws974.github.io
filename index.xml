@@ -8,12 +8,15 @@
     <language>en-US</language>
     <lastBuildDate>Sun, 09 May 2021 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>python and r coding demonstration</title>
+      <title>extremely simple python and r coding demonstration</title>
       <link>/post/2021/05/09/python-and-r-coding-demonstration/</link>
       <pubDate>Sun, 09 May 2021 00:00:00 +0000</pubDate>
       
       <guid>/post/2021/05/09/python-and-r-coding-demonstration/</guid>
-      <description></description>
+      <description>how are you doing today? i may be an extremely new coder, but i can show you some simple code to demontrate how python and R can work together using reticulate.
+first, in R, we will run this code:
+library(reticulate) Alexis &amp;lt;- &amp;quot;I love&amp;quot; then, in python, we will run this code:
+Salim=&amp;quot;food and cooking&amp;quot; print(r.Alexis, Salim) ## I love food and cooking pretty cool, it took something from R and put it into the python chunk to print out a sentence</description>
     </item>
     
     <item>

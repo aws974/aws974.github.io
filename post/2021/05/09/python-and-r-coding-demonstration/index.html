@@ -7,7 +7,7 @@
     <meta name="author" content="Alexis Salim" />
     
     <link rel="shortcut icon" type="image/x-icon" href="../../../../../img/favicon.ico">
-    <title>python and r coding demonstration</title>
+    <title>extremely simple python and r coding demonstration</title>
     <meta name="generator" content="Hugo 0.83.1" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="../../../../../css/main.css" />
@@ -54,7 +54,7 @@
       <div class="container">
         <div class="blog-post">
           <h3>
-            <strong><a href="../../../../../post/2021/05/09/python-and-r-coding-demonstration/">python and r coding demonstration</a></strong>
+            <strong><a href="../../../../../post/2021/05/09/python-and-r-coding-demonstration/">extremely simple python and r coding demonstration</a></strong>
           </h3>
         </div>
  
@@ -72,7 +72,21 @@
               
 
 
-
+<p>how are you doing today? i may be an extremely new coder, but i can show you some simple code to demontrate how python and R can work together using reticulate.</p>
+<p>first, in R, we will run this code:</p>
+<pre class="r"><code>library(reticulate)
+Alexis &lt;- &quot;I love&quot;</code></pre>
+<p>then, in python, we will run this code:</p>
+<pre class="python"><code>Salim=&quot;food and cooking&quot;
+print(r.Alexis, Salim)</code></pre>
+<pre><code>## I love food and cooking</code></pre>
+<p>pretty cool, it took something from R and put it into the python chunk to print out a sentence</p>
+<p>the same sentence can be printed in an R chunk like this:</p>
+<pre class="r"><code>cat(c(Alexis, py$Salim))</code></pre>
+<pre><code>## I love food and cooking</code></pre>
+<p>in sum, you can tell that i really care about food and cooking :) i hope this simple demonstration made sense!</p>
+<p>here’s a picture of one of my favorite desserts from Japan: kakigori! it’s a wonderfully light rendition of shaved ice</p>
+<p><img src="../../../../../post/2021-05-09-python-and-r-coding-demonstration_files/kakigori.png" /></p>
 
             
         <hr>         <div class="related-posts">
